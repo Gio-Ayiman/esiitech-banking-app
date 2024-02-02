@@ -10,7 +10,6 @@ import java.util.Scanner;
 public class UtilisateurService {
 
     public Utilisateur creerUtilisateur(Scanner scanner) {
-
         System.out.println("Veuillez entrer votre nom");
         String nom = scanner.nextLine();
 

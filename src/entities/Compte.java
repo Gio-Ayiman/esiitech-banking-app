@@ -8,11 +8,10 @@ public class Compte {
     private StatutCompte statut;
     private Client proprietaire;
 
-    public Compte(String numero, Double solde, StatutCompte statut, Client proprietaire) {
+    public Compte(String numero, Double solde, StatutCompte statut) {
         this.numero = numero;
         this.solde = solde;
         this.statut = statut;
-        this.proprietaire = proprietaire;
     }
 
     public String getNumero() {
@@ -45,5 +44,15 @@ public class Compte {
 
     public void setProprietaire(Client proprietaire) {
         this.proprietaire = proprietaire;
+    }
+
+    @Override
+    public String toString() {
+        return "Compte{" +
+                "numero='" + numero + '\'' +
+                ", solde=" + solde +
+                ", statut=" + statut +
+                ", proprietaire=" + proprietaire +
+                '}';
     }
 }

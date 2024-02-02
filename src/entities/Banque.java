@@ -6,9 +6,9 @@ public class Banque {
     private String nom;
     private String quartier;
     private String codeBanque;
-    private List<Agence> agences;
+        private List<Agence> agences;
 
-    public Banque(String nom, String quartier, String codeBanque) {
+        public Banque(String nom, String quartier, String codeBanque) {
         this.nom = nom;
         this.quartier = quartier;
         this.codeBanque = codeBanque;

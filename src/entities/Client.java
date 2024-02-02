@@ -18,4 +18,8 @@ public class Client extends Utilisateur {
     public void setCompte(Compte compte) {
         this.compte = compte;
     }
+
+    public static Client fromUser(Utilisateur user) {
+        return new Client(user.getNom(), user.getGenre(), user.getDateNaissance(), user.getQuartier());
+    }
 }
