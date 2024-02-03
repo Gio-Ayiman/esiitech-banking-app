@@ -5,6 +5,7 @@ import enums.Genre;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 public class UtilisateurService {
@@ -23,6 +24,16 @@ public class UtilisateurService {
         String quartier = scanner.nextLine();
 
         return new Utilisateur(nom, genre, dateNaissance, quartier);
+    }
+
+    public Utilisateur findUserByUsername(String username, List<Utilisateur> users) {
+        for (Utilisateur user: users) {
+            if (user.getUsername().equals(username)) {
+                return user;
+            }
+        }
+
+        return null;
     }
 
     private Genre convertToGenre(String genre) {

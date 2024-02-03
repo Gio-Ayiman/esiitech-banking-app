@@ -20,7 +20,7 @@ public class AgenceService {
 
     public Agence getAgenceParNom(String nomAgence, List<Agence> agences) {
         for (Agence agence : agences) {
-            if (agence.getNom() == nomAgence) return agence;
+            if (agence.getNom().equalsIgnoreCase(nomAgence)) return agence;
         }
 
         return null;

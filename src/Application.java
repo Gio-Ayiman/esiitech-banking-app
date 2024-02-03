@@ -1,6 +1,11 @@
-import entities.*;
+import entities.Agence;
+import entities.Banque;
+import services.AuthenticationService;
+import entities.Utilisateur;
 import services.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Application {
@@ -10,94 +15,126 @@ public class Application {
         ClientService clientService = new ClientService();
         AgenceService agenceService = new AgenceService();
         CompteService compteService = new CompteService();
+        BanqueService banqueService = new BanqueService();
+        UtilisateurService utilisateurService = new UtilisateurService();
+        AuthenticationService authenticationService = new AuthenticationService();
+
+        List<Utilisateur> usersList = new ArrayList<>();
+        List<Banque> banqueList = new ArrayList<>();
+        List<Agence> agenceList = new ArrayList<>();
+
+
+        Utilisateur admin = createUserAdmin();
+        usersList.add(admin);
 
         System.out.println("======== Bienvenu sur l'application BankingApp d'Esiitech ==========" + "\n");
 
-        boolean exit = false;
-        int reponse;
-
+        boolean exitFirstMenu = false;
         do {
-            afficherMenu();
+            afficherMenuConnexion();
+            int choix = scanner.nextInt();
+            scanner.nextLine();
 
-            try {
+            if (choix < 1 || choix > 2) {
+                System.out.println("Entrez une option valide");
+            } else if (choix == 1) {
+                exitFirstMenu = true;
 
-                do {
-                    reponse = Integer.parseInt(scanner.nextLine());
-                    if (reponse < 1 || reponse > 2) {
-                        System.out.println("Veuillez entrer une option valide");
-                        afficherMenu();
-                    }
+                System.out.println("Entrez votre username");
+                String username = scanner.nextLine();
 
-                    if (reponse == 1) {
-                        UtilisateurService utilisateurService = new UtilisateurService();
-                        Utilisateur user = utilisateurService.creerUtilisateur(scanner);
+                System.out.println("Entrez votre mot de passe");
+                String password = scanner.nextLine();
 
-                        System.out.println("Vous venez de creer un utilisateur souhaitez-vous continuer ? (OUI/NON)");
-                        String choix = scanner.nextLine();
+                Utilisateur userCourant = utilisateurService.findUserByUsername(username, usersList);
+                boolean isAuthenticated = false;
 
-                        if (choix.toLowerCase() == "oui") {
-                            System.out.println("Creation de la banque");
-                            BanqueService banqueService = new BanqueService();
-                            Banque banque = banqueService.creerBanque(scanner);
+                if (userCourant != null) {
+                    isAuthenticated = authenticationService.authenticate(username, password, userCourant);
+                } else {
+                    System.out.println("Cette utilisateur n'existe pas en base de donnee");
+                }
 
-                            System.out.println("Creation des agences");
+                if (Boolean.TRUE.equals(isAuthenticated)) {
 
-                            boolean ajouterAgence;
+                    boolean exitPremierMenuAdmin = false;
 
-                            do {
-                                Agence agence = agenceService.creerAgence(scanner);
-                                banqueService.ajouterAgence(banque, agence);
-                                System.out.println("Voulez-vous creer une autre agence ? (OUI/NON)");
-                                ajouterAgence = scanner.nextLine().toLowerCase() == "oui" ? true : false;
-                            } while (ajouterAgence);
+                    do {
+                        afficherPremierMenuAdmin();
 
-                            System.out.println("Dans quelle agence souhaitez-vous enroller votre client ? ");
-                            for (Agence agence : banque.getAgences()) {
-                                System.out.println(agence.getNom());
+                        System.out.println("Choisissez une option");
+                        int choixPremierMenuAdmin = scanner.nextInt();
+                        scanner.nextLine();
+
+                        if (choixPremierMenuAdmin < 1 || choixPremierMenuAdmin > 2) {
+                            System.out.println("Option non valide. Recommencez !");
+                        } else {
+                            if (choixPremierMenuAdmin == 1) {
+                                boolean choixCreerBanque = false;
+
+                                if (banqueList.isEmpty()) {
+                                    System.out.println("Il n'existe aucune banque ! Voulez vous creer une ? (OUI/NON)");
+                                    choixCreerBanque = scanner.nextLine().equalsIgnoreCase("oui");
+                                }
+
+                                if (!banqueList.isEmpty()) {
+                                    afficherListeBanque(banqueList);
+
+                                    System.out.println("Voulez vous creer une autre banque ? (OUI/NON) ");
+                                    choixCreerBanque = scanner.nextLine().equalsIgnoreCase("oui");
+
+                                }
+
+                                while (choixCreerBanque) {
+                                    Banque banque = banqueService.creerBanque(scanner);
+                                    banqueList.add(banque);
+                                    afficherListeBanque(banqueList);
+
+                                    System.out.println("Voulez vous creer une autre banque ? (OUI/NON) ");
+                                    choixCreerBanque = scanner.nextLine().equalsIgnoreCase("oui");
+                                }
                             }
 
-                            String nomAgence = scanner.nextLine();
-                            Agence agence = agenceService.getAgenceParNom(nomAgence, banque.getAgences());
+                            if (choixPremierMenuAdmin == 2) {
+                                if (agenceList.size() < 1) {
 
-                            if (agence == null) {
-                                System.out.println("Cette agence n'existe pas");
-                            } else {
-                                Compte compte = compteService.creerCompte(agence, banque);
-
-                                Utilisateur utilisateur = utilisateurService.creerUtilisateur(scanner);
-                                Client client = clientService.creerClient(utilisateur, compte);
-                                compte.setProprietaire(client);
-                                compteService.afficherCompte(compte);
-                            }
-
-                            System.out.println("1- Revenir au menu\n2- Quitter");
-                            int choixQuitter = scanner.nextInt();
-
-                            if (choixQuitter == 1) {
-                                afficherMenu();
-                            } else {
-                                reponse = 4;
+                                }
                             }
                         }
-                    } else if (reponse == 2) {
-                        // TODO
-                    }
+                    } while (!exitPremierMenuAdmin);
 
-                } while (reponse > 0 || reponse < 3);
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
+                } else {
+                    afficherMenuConnexion();
+                }
+
+
             }
 
-
-            exit = false;
-        } while (exit);
-
+        } while (!exitFirstMenu);
 
     }
 
+    public static void afficherMenuConnexion() {
+        System.out.println("1- Se connecter");
+        System.out.println("2- Creer un compte");
+    }
 
-    public static void afficherMenu() {
-        System.out.println(" 1- Creer un utilisateur ");
-        System.out.println(" 2- Creer une banque ");
+
+    public static void afficherPremierMenuAdmin() {
+        System.out.println(" 1- Afficher la liste des banques ");
+        System.out.println(" 2- Afficher la liste des agences");
+    }
+
+    public static Utilisateur createUserAdmin() {
+        return new Utilisateur("admin", "admin");
+    }
+
+    public static void afficherListeBanque(List<Banque> banqueList) {
+        int nombreBanque = banqueList.size();
+
+        System.out.println("La liste des banques");
+        for (int i = 0; i < nombreBanque; i++) {
+            System.out.println(i + 1 + "- " + banqueList.get(i).getNom());
+        }
     }
 }
